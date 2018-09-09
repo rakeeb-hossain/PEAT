@@ -85,23 +85,22 @@ mainFrame::mainFrame(QWidget *parent) :
     help->addAction(peatHelp);
     help->addAction(aboutPEAT);
     help->addAction(traceHome);
-
     //layout->setMenuBar(menubar);
-    connect(openVideo, &QAction::triggered, this, mainFrame::on_folderButton_clicked);
-    connect(openReport, &QAction::triggered, this, mainFrame::openReport);
-    connect(generateReport, &QAction::triggered, this, mainFrame::on_reportButton_clicked);
+    connect(openVideo, &QAction::triggered, this, &mainFrame::on_folderButton_clicked);
+    connect(openReport, &QAction::triggered, this, &mainFrame::openReport);
+    connect(generateReport, &QAction::triggered, this, &mainFrame::on_reportButton_clicked);
     connect(quit, &QAction::triggered, qApp, QApplication::quit);
-    connect(remove, &QAction::triggered, this, mainFrame::openProTool);
+    connect(remove, &QAction::triggered, this, &mainFrame::openProTool);
 
-    connect(skipLeft, &QAction::triggered, this, mainFrame::skipLeftFunc);
-    connect(skipRight, &QAction::triggered, this, mainFrame::skipRightFunc);
-    connect(playPause, &QAction::triggered, this, mainFrame::playPauseFunc);
-    connect(skipFrameRight, &QAction::triggered, this, mainFrame::skipFrameRightFunc);
-    connect(skipFrameLeft, &QAction::triggered, this, mainFrame::skipFrameLeftFunc);
+    connect(skipLeft, &QAction::triggered, this, &mainFrame::skipLeftFunc);
+    connect(skipRight, &QAction::triggered, this, &mainFrame::skipRightFunc);
+    connect(playPause, &QAction::triggered, this,& mainFrame::playPauseFunc);
+    connect(skipFrameRight, &QAction::triggered, this, &mainFrame::skipFrameRightFunc);
+    connect(skipFrameLeft, &QAction::triggered, this, &mainFrame::skipFrameLeftFunc);
 
-    connect(peatHelp, &QAction::triggered, this, mainFrame::peatHelp);
-    connect(aboutPEAT, &QAction::triggered, this, mainFrame::aboutPEAT);
-    connect(traceHome, &QAction::triggered, this, mainFrame::traceHome);
+    connect(peatHelp, &QAction::triggered, this, &mainFrame::peatHelp);
+    connect(aboutPEAT, &QAction::triggered, this, &mainFrame::aboutPEAT);
+    connect(traceHome, &QAction::triggered, this, &mainFrame::traceHome);
 
     ui->customPlot->yAxis->setRange(0,1);
     ui->customPlot->xAxis->setLabel("Frame Number");
@@ -166,6 +165,7 @@ mainFrame::~mainFrame()
 
 void mainFrame::on_folderButton_clicked()
 {
+
     QString filename = QFileDialog::getOpenFileName(this, "Open a Video File", "", "Video File (*.mp4, *.avi, *.mpeg, *.*)");
     QFileInfo fi(filename);
     QString ext = fi.suffix();
@@ -480,6 +480,8 @@ void mainFrame::on_reportButton_clicked()
             QDir().mkdir(folderName);
             QDir().mkdir(folderName + "/frames");
             vector<int> properties = frameSplit(stringedFile, stringedFolder);
+            QApplication::processEvents();
+            qDebug() << "bs0.5";
             qDebug() << properties.size();
             if (properties.size() != 0)
             {
@@ -494,6 +496,7 @@ void mainFrame::on_reportButton_clicked()
                 cout << properties[1] << endl;
                 cout << properties[2] << endl;
                 cout << properties[3] << endl;
+                qDebug() << "bs0.75";
 
                 rkbcore(stringedFolder + "/frames/", folderName, properties);
                 //waitdialog->hide();
@@ -538,14 +541,101 @@ void mainFrame::on_reportButton_clicked()
                     QTextStream in(&reportFile);
                     QString line;
                     int counter = 0;
-                    double ynum;
+                    bool atStart = true;
+                    int start = 0;
+                    int end = 0;
+                    int frameN = 0;
+                    int frameDiagValue = 0;
+                    //double ynum;
+                    int ynum;
                     vector<double> y;
                     vector<double> x;
 
+                    vector<double> yDiag;
+                    vector<double> xDiag;
                     int64 frameNum = 0;
 
-                    bool ok;
+                    bool isDiagnostic = false;
                     int n = 0;
+                    while (!in.atEnd())
+                    {
+                        line = in.readLine();
+                        ynum = line.toInt();
+                        if (line == "Diagnostic")
+                        {
+                            isDiagnostic = true;
+                        }
+                        if (counter > 0)
+                        {
+                            if (isDiagnostic == false)
+                            {
+                                if(atStart == true)
+                                {
+                                    start = ynum;
+                                    for (int i = end; i <= start; i++)
+                                    {
+
+                                        y.push_back(0.0);
+                                        x.push_back(static_cast<double>(i));
+                                    }
+                                    atStart = !atStart;
+                                }
+                                else {
+                                    end = ynum;
+                                    for (int i = start; i <= end; i++)
+                                    {
+
+                                        y.push_back(1.0);
+                                        x.push_back(static_cast<double>(i));
+                                    }
+                                    atStart = !atStart;
+                                }
+                            }
+                        }
+                        else {
+                            frameNum = line.toInt();
+                        }
+
+                        if(isDiagnostic == true && n > 0)
+                        {
+                            if(atStart == true)
+                            {
+                                for(int a = frameN; a < ynum; a++)
+                                {
+                                    if(ynum - frameN < 30)
+                                    {
+                                        xDiag.push_back(static_cast<double>(a));
+                                        yDiag.push_back(frameDiagValue/10.0);
+                                    }
+
+                                    else {
+                                        xDiag.push_back(static_cast<double>(a));
+                                        yDiag.push_back(0.0);
+                                    }
+                                }
+                                frameN = ynum;
+                                xDiag.push_back(frameN/1.0);
+                                atStart = !atStart;
+                            }
+                            else{
+                                frameDiagValue = ynum;
+                                if (frameDiagValue > 10)
+                                {
+                                    frameDiagValue = 10;
+                                }
+                                yDiag.push_back(frameDiagValue/10.0);
+                                atStart = !atStart;
+                            }
+                        }
+                        else if(isDiagnostic == true && n == 0)
+                        {
+                            atStart = true;
+                            n++;
+                        }
+                        counter++;
+                    }
+
+                    /*
                     while (!in.atEnd())
                     {
                         line = in.readLine();
@@ -575,21 +665,37 @@ void mainFrame::on_reportButton_clicked()
                             x.push_back(floor(frameNum/30) * 30 + a);
                         }
                     }
+                    */
                     QVector<double> xx = QVector<double>::fromStdVector(x);
                     QVector<double> yy = QVector<double>::fromStdVector(y);
+
+                    QVector<double> xxDiag = QVector<double>::fromStdVector(xDiag);
+                    QVector<double> yyDiag = QVector<double>::fromStdVector(yDiag);
+
                     qDebug() << xx.size();
 
                     ui->customPlot->addGraph();
                     QPen dotted;
-                    dotted.setStyle(Qt::DotLine);
+                    dotted.setStyle(Qt::SolidLine);
                     dotted.setWidthF(4);
-                    dotted.setColor(Qt::red);
-                    ui->customPlot->graph()->setPen(dotted);
-                    ui->customPlot->graph()->setLineStyle(QCPGraph::lsLine);
+                    dotted.setColor(Qt::white);
+                    ui->customPlot->graph(0)->setPen(dotted);
+                    ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
                     //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
                     ui->customPlot->graph(0)->setData(xx, yy);
                     ui->customPlot->xAxis->scaleRange(5.0, ui->customPlot->xAxis->range().center());
                     //ADDED
+                    ui->customPlot->addGraph();
+                    QPen solid;
+                    dotted.setStyle(Qt::DotLine);
+                    dotted.setWidthF(2);
+                    dotted.setColor(Qt::white);
+                    ui->customPlot->graph(1)->setPen(solid);
+                    ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
+                    //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+                    ui->customPlot->graph(1)->setData(xxDiag, yyDiag);
+                    ui->customPlot->xAxis->scaleRange(5.0, ui->customPlot->xAxis->range().center());
+
                     ui->customPlot->replot();
 
                     // Load warnings
@@ -659,12 +765,101 @@ void mainFrame::openReport()
             QTextStream in(&reportFile);
             QString line;
             int counter = 0;
-            double ynum;
+            bool atStart = true;
+            int start = 0;
+            int end = 0;
+            int frameN = 0;
+            int frameDiagValue = 0;
+            //double ynum;
+            int ynum;
             vector<double> y;
             vector<double> x;
-            int numOfFrames;
-            bool ok;
+
+            vector<double> yDiag;
+            vector<double> xDiag;
+            int64 frameNum = 0;
+
+            bool isDiagnostic = false;
             int n = 0;
+            while (!in.atEnd())
+            {
+                line = in.readLine();
+                ynum = line.toInt();
+                if (line == "Diagnostic")
+                {
+                    isDiagnostic = true;
+                }
+                if (counter > 0)
+                {
+                    if (isDiagnostic == false)
+                    {
+                        if(atStart == true)
+                        {
+                            start = ynum;
+                            for (int i = end; i <= start; i++)
+                            {
+
+                                y.push_back(0.0);
+                                x.push_back(static_cast<double>(i));
+                            }
+                            atStart = !atStart;
+                        }
+                        else {
+                            end = ynum;
+                            for (int i = start; i <= end; i++)
+                            {
+
+                                y.push_back(1.0);
+                                x.push_back(static_cast<double>(i));
+                            }
+                            atStart = !atStart;
+                        }
+                    }
+                }
+                else {
+                    frameNum = line.toInt();
+                }
+
+                if(isDiagnostic == true && n > 0)
+                {
+                    if(atStart == true)
+                    {
+                        for(int a = frameN; a < ynum; a++)
+                        {
+                            if(ynum - frameN < 30)
+                            {
+                                xDiag.push_back(static_cast<double>(a));
+                                yDiag.push_back(frameDiagValue/10.0);
+                            }
+
+                            else {
+                                xDiag.push_back(static_cast<double>(a));
+                                yDiag.push_back(0.0);
+                            }
+                        }
+                        frameN = ynum;
+                        xDiag.push_back(frameN/1.0);
+                        atStart = !atStart;
+                    }
+                    else{
+                        frameDiagValue = ynum;
+                        if (frameDiagValue > 10)
+                        {
+                            frameDiagValue = 10;
+                        }
+                        yDiag.push_back(frameDiagValue/10.0);
+                        atStart = !atStart;
+                    }
+                }
+                else if(isDiagnostic == true && n == 0)
+                {
+                    atStart = true;
+                    n++;
+                }
+                counter++;
+            }
+
+            /*
             while (!in.atEnd())
             {
                 line = in.readLine();
@@ -680,41 +875,70 @@ void mainFrame::openReport()
 
                     }
                     n += 30;
-
                 }
                 else {
-                    numOfFrames = line.toInt();
+                    frameNum = line.toInt();
                 }
                 counter++;
             }
-            QVector<double> xx = QVector<double>::fromStdVector(x);
-            QVector<double> yy = QVector<double>::fromStdVector(y);
+            if(in.atEnd())
+            {
+                for (int a = 1; a <= (frameNum % 30); a++)
+                {
+                    y.push_back(0.15);
+                    x.push_back(floor(frameNum/30) * 30 + a);
+                }
+            }
+            */
             ui->horizontalScrollBar->setEnabled(true);
-            ui->horizontalScrollBar->setRange(0, numOfFrames);
+            ui->horizontalScrollBar->setRange(0, frameNum);
             ui->customPlot->yAxis->setRange(0.0, 1.0);
             ui->customPlot->xAxis->setLabel("Frame Number");
             connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
             connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
             ui->customPlot->replot();
 
+            QVector<double> xx = QVector<double>::fromStdVector(x);
+            QVector<double> yy = QVector<double>::fromStdVector(y);
+
+            QVector<double> xxDiag = QVector<double>::fromStdVector(xDiag);
+            QVector<double> yyDiag = QVector<double>::fromStdVector(yDiag);
+
+            qDebug() << xx.size();
+
             ui->customPlot->addGraph();
             QPen dotted;
-            dotted.setStyle(Qt::DotLine);
+            dotted.setStyle(Qt::SolidLine);
             dotted.setWidthF(4);
-            dotted.setColor(Qt::red);
+            dotted.setColor(Qt::white);
             ui->customPlot->graph(0)->setPen(dotted);
             ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
             //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
             ui->customPlot->graph(0)->setData(xx, yy);
             ui->customPlot->xAxis->scaleRange(5.0, ui->customPlot->xAxis->range().center());
+            //ADDED
+            ui->customPlot->addGraph();
+            QPen solid;
+            dotted.setStyle(Qt::DotLine);
+            dotted.setWidthF(2);
+            dotted.setColor(Qt::white);
+            ui->customPlot->graph(1)->setPen(solid);
+            ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
+            //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+            ui->customPlot->graph(1)->setData(xxDiag, yyDiag);
+            ui->customPlot->xAxis->scaleRange(5.0, ui->customPlot->xAxis->range().center());
+
             ui->customPlot->replot();
 
+            for (int i = 0; i < yyDiag.size(); i++)
+            {
+                qDebug() << yyDiag[i];
+            }
             // Load warnings
             ui->backWarning->setStyleSheet("#backWarning { background-image: url(:/images/Res/PrevWarningUp.png); border-image: url(:/images/Res/PrevWarningUp.png); } #backWarning:hover { border-image: url(:/images/Res/PrevWarningDownHilite.png); } #backWarning:pressed { border-image: url(:/images/Res/PrevWarningPressed.png); }");
             ui->forwardWarning->setStyleSheet("#forwardWarning { background-image: url(:/images/Res/NextvWarningUp.png); border-image: url(:/images/Res/NextWarningUp.png); } #forwardWarning:hover { border-image: url(:/images/Res/NextWarningDownHilite.png); } #forwardWarning:pressed { border-image: url(:/images/Res/NextWarningPressed.png); }");
             ui->backWarning->setEnabled(true);
             ui->forwardWarning->setEnabled(true);
-
             warnings.clear();
 
             for (int a = 0; a < y.size(); a += 30)
@@ -725,6 +949,7 @@ void mainFrame::openReport()
                 }
             }
             ui->label_6->setText(QString::number(warnings.size()));
+
 
         }
     }

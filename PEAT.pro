@@ -54,13 +54,14 @@ QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS
 INCLUDEPATH += C:\opencv-build\install\include
 
 LIBS += -L C:\\opencv-build\\bin \
-    libopencv_core320 \
-    libopencv_highgui320 \
-    libopencv_imgproc320 \
-    libopencv_features2d320 \
-    libopencv_calib3d320 \
-    libopencv_videoio320 \
-    libopencv_imgcodecs320 \
+    libopencv_core331 \
+    libopencv_highgui331 \
+    libopencv_imgproc331 \
+    libopencv_features2d331 \
+    libopencv_calib3d331 \
+    libopencv_videoio331 \
+    libopencv_imgcodecs331 \
+    libopencv_ffmpeg331 \
 
 DISTFILES += \
     README
