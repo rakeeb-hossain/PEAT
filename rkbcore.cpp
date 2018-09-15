@@ -21,6 +21,7 @@
 #include <QFile>
 #include <QProgressDialog>
 #include <algorithm>
+#include <set>
 
 using namespace std;
 using namespace cv;
@@ -262,6 +263,10 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
     int aarb = 0;
     int rate = round(properties[1]);
 
+    QString newPath = QString::fromStdString(path);
+    QDir dir(newPath);
+    dir.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
+    numOfFrames = dir.count();
 
     vector<vector<int > > seizureBoundaries;
     seizureBoundaries.push_back({0,0});
@@ -278,6 +283,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
     bool wasSeizure = false;
     int count = 0;
     QApplication::processEvents();
+
 
     while(n + 30 <= numOfFrames)
     {
@@ -545,6 +551,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                 {
                     bounds.push_back(lumDiagFrames[lumDiagFrames.size() - lumDiagFrames[lumDiagFrames.size() - 1][1]][0]);
                     bounds.push_back(lumDiagFrames[lumDiagFrames.size() - 1][0]);
+
                     qDebug() << "BROP: " << lumDiagFrames[lumDiagFrames.size() - lumDiagFrames[lumDiagFrames.size() - 1][1]][0];
                     if (lumDiagFrames[lumDiagFrames.size() - lumDiagFrames[lumDiagFrames.size() - 1][1]][0] > seizureBoundaries[seizureBoundaries.size() - 1][1])
                     {
@@ -555,7 +562,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                         qDebug() << currentLumSizeSecond;
                         qDebug() << lumDiagFrames[lumDiagFrames.size() - 1][1];
                         //currentLumSizeSecond = 297 for some reason
-                        lumDiagFrames.erase(lumDiagFrames.begin() + currentLumSizeSecond - 1, lumDiagFrames.begin() + lumDiagFrames.size() - 1 - lumDiagFrames[lumDiagFrames.size() - 1][1]);
+                        //lumDiagFrames.erase(lumDiagFrames.begin() + currentLumSizeSecond - 1, lumDiagFrames.begin() + lumDiagFrames.size() - 1 - lumDiagFrames[lumDiagFrames.size() - 1][1]);
                     }
                     else {
                         seizureBoundaries[seizureBoundaries.size() - 1][1] = lumDiagFrames[lumDiagFrames.size() - 1][0];
@@ -626,7 +633,28 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
             }
         }
     }
-
+    /*
+    vector< vector<int>> newLumInfo = {};
+    int editCount = 0;
+    bool foundRepeat = false;
+    //Loop to edit lumDiagFrames
+    for (int i = 0; i < lumDiagFrames.size(); i++)
+    {
+        for (int x = 0; x < newLumInfo.size(); x++)
+        {
+            if (lumDiagFrames[i][0] == newLumInfo[x][0])
+            {
+                foundRepeat = true;
+                break;
+            }
+        }
+        if (foundRepeat == false)
+        {
+            newLumInfo.push_back(lumDiagFrames[i]);
+        }
+    }
+    */
+    //
     if (seizureBoundaries.size() > 1) {
         if ( file.open(QIODevice::ReadWrite|QIODevice::Text) )
         {
@@ -650,7 +678,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
         if ( aFile.open(QIODevice::ReadWrite|QIODevice::Text) )
         {
             QTextStream stream( &aFile );
-            stream << properties[0] << endl;
+            stream << numOfFrames << endl;
             for (int x = 1; x < seizureBoundaries.size(); x++)
             {
                 stream << seizureBoundaries[x][0] << endl;
