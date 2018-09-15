@@ -957,7 +957,7 @@ void mainFrame::openReport()
                 {
                     for (int x = lastValue + 1; x < moved + 1; x++)
                     {
-                        alpha *= 1.0 + (x)*0.01;
+                        alpha += 1.0 + (x)*0.01;
                     }
                 }
                 else {

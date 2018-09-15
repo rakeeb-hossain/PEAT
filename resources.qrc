@@ -151,5 +151,6 @@
         <file>Res/HardingFPA.rc2</file>
         <file>Res/HardingFPADoc.ico</file>
         <file>Res/HardingFPA.ico</file>
+        <file>Res/cage.png</file>
     </qresource>
 </RCC>
