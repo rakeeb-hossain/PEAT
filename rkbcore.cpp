@@ -418,12 +418,11 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
 
         int currentLumArrSize = lumDiagFrames.size();
 
-        for(int j = 0; j < frame1.rows - 256; j += 15)
+        for(int j = 0; j < frame1.rows - 256; j += 30)
         {
-            for(int k = 0; k < frame1.cols - 341; k += 15)
+            for(int k = 0; k < frame1.cols - 341; k += 30)
             {
                 int currentLumSizeSecond = lumDiagFrames.size();
-                diagInt = 0;
                 wasSeizure = false;
                 avgLum = 0.0;
                 avgLumMatrix.empty();
@@ -601,6 +600,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                 for (int i = 0; i < newDiagFrames.size(); i++)
                 {
                     qDebug() << "Test4: " << newDiagFrames[i];
+                    /*
                     if (i != 0)
                     {
                         lumDiagFrames.push_back({newDiagFrames[i], 2});
@@ -608,6 +608,8 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                     else {
                         lumDiagFrames.push_back({newDiagFrames[i], i + 1});
                     }
+                    */
+                    lumDiagFrames.push_back({newDiagFrames[i], i+1});
                 }
                 for (int x = 0; x < newDiagFrames.size(); x++)
                 {
@@ -791,15 +793,15 @@ void proTool(QString ndir, QString report, int decision, double alpha)
                     {
                         if (warn.size() != 0 && warn[i] != 0)
                         {
-                            sampleRate = floor((warn[i+1] - warn[i])/15);
-                            extraFrames = (warn[i+1] - warn[i]) % 15;
+                            sampleRate = floor((warn[i+1] - warn[i])/30);
+                            extraFrames = (warn[i+1] - warn[i]) % 30;
                             if(sampleRate > 0)
                             {
                                 for(int b = 0; b < sampleRate; b++)
                                 {
-                                    makeFrameGradient(warn[i] + 1, warn[i] + 15*(b+1), dir, dir);
+                                    makeFrameGradient(warn[i] + 1 + 30*(b), warn[i] + 30*(b+1), dir, dir);
                                 }
-                                makeFrameGradient(warn[i] + 15*sampleRate + 1, warn[i] + 15*sampleRate + extraFrames, dir, dir);
+                                makeFrameGradient(warn[i] + 16*sampleRate + 1, warn[i] + 30*sampleRate + extraFrames, dir, dir);
                             }
                             else {
                                 makeFrameGradient(warn[i] + 1, (warn[i+1]), dir, dir);

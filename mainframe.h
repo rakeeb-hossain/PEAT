@@ -113,6 +113,7 @@ private:
     QStatusBar *statusbar;
     int index = 0;
     rkbProTool *rkbprotool;
+    QCPItemRect *section;
 
 };
 

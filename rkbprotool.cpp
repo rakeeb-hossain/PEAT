@@ -94,7 +94,7 @@ void rkbProTool::on_pushButton_clicked()
 
 void rkbProTool::on_pushButton_2_clicked()
 {
-    QString report = QFileDialog::getOpenFileName(this, "Open a report file", "", ".txt (*.*)");
+    QString report = QFileDialog::getOpenFileName(this, "Open a report file", "", "Open PEAT Report [NON-USER] (*.txt)");
     ui->lineEdit_2->setText(report);
 }
 

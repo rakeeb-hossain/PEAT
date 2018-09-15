@@ -101,10 +101,32 @@ mainFrame::mainFrame(QWidget *parent) :
     connect(peatHelp, &QAction::triggered, this, &mainFrame::peatHelp);
     connect(aboutPEAT, &QAction::triggered, this, &mainFrame::aboutPEAT);
     connect(traceHome, &QAction::triggered, this, &mainFrame::traceHome);
-
     ui->customPlot->yAxis->setRange(0,1);
+    ui->customPlot->yAxis->setVisible(false);
     ui->customPlot->xAxis->setLabel("Frame Number");
-    ui->customPlot->setBackground(QBrush(QColor("#bbc0c9")));
+    ui->customPlot->setBackground(QBrush(QColor(214,214,214,255)));
+
+    //9/15/18
+    section = new QCPItemRect(ui->customPlot);
+    ui->customPlot->addLayer("sectionBackground", ui->customPlot->layer("grid"), QCustomPlot::limBelow);
+    section->setLayer("sectionBackground");
+
+    section->topLeft->setTypeX(QCPItemPosition::ptPlotCoords);
+    section->topLeft->setTypeY(QCPItemPosition::ptAxisRectRatio);
+    section->topLeft->setAxes(ui->customPlot->xAxis, ui->customPlot->yAxis);
+    section->topLeft->setAxisRect(ui->customPlot->axisRect());
+    section->bottomRight->setTypeX(QCPItemPosition::ptPlotCoords);
+    section->bottomRight->setTypeY(QCPItemPosition::ptAxisRectRatio);
+    section->bottomRight->setAxes(ui->customPlot->xAxis, ui->customPlot->yAxis);
+    section->bottomRight->setAxisRect(ui->customPlot->axisRect());
+    section->setClipToAxisRect(true); // is by default true already, but this will change in QCP 2.0.0
+
+    section->topLeft->setCoords(0, 1.0); // the y value is now in axis rect ratios, so -0.1 is "barely above" the top axis rect border
+    section->bottomRight->setCoords(100000, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
+
+    section->setBrush(QBrush(QColor(200,200,200,255)));
+    section->setPen(Qt::NoPen);
+    //
     QCPItemLine *line = new QCPItemLine(ui->customPlot);
     line->start->setCoords(0 , 0.25);
     line->end->setCoords(10000000 , 0.25);
@@ -508,6 +530,7 @@ void mainFrame::on_reportButton_clicked()
                 ui->horizontalScrollBar->setEnabled(true);
                 ui->horizontalScrollBar->setRange(0, properties[0]);
                 ui->customPlot->yAxis->setRange(0.0, 1.0);
+                ui->customPlot->yAxis->setVisible(false);
                 ui->customPlot->xAxis->setLabel("Frame Number");
                 connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
                 connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
@@ -555,6 +578,13 @@ void mainFrame::on_reportButton_clicked()
                     vector<double> xDiag;
                     int64 frameNum = 0;
 
+                    double startOfRed = 0.0;
+                    double endOfRed = 0.0;
+                    vector<double> redPortions = {};
+                    //QString stylesheet = "QSlider::groove:horizontal { border: 1px solid #999999; height: 10px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #B1B1B1, stop: 1.0 #c4c4c4); margin: 2px 0; } QSlider::handle:horizontal { background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f); border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 3px; }";
+                    QString firstHalfStylesheet = "QSlider::groove:horizontal { border: 1px solid #999999; height: 10px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #25c660, ";
+                    QString secondHalfStylesheet = "stop: 1.0 #25c660); margin: 2px 0; } QSlider::handle:horizontal { background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f); border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 3px; }";
+
                     bool isDiagnostic = false;
                     int n = 0;
                     while (!in.atEnd())
@@ -582,6 +612,13 @@ void mainFrame::on_reportButton_clicked()
                                 }
                                 else {
                                     end = ynum;
+                                    startOfRed = static_cast<double>(start)/frameNum;
+                                    endOfRed = static_cast<double>(end)/frameNum;
+                                    redPortions.push_back(startOfRed - 0.0001);
+                                    redPortions.push_back(startOfRed);
+                                    redPortions.push_back(endOfRed);
+                                    redPortions.push_back(endOfRed + 0.0001);
+
                                     for (int i = start; i <= end; i++)
                                     {
 
@@ -634,6 +671,15 @@ void mainFrame::on_reportButton_clicked()
                         }
                         counter++;
                     }
+                    for (int x = 0; x < redPortions.size(); x += 4)
+                    {
+                        firstHalfStylesheet += "stop: " + QString::number(redPortions[x]) + " #25c660, ";
+                        firstHalfStylesheet += "stop: " + QString::number(redPortions[x+1]) + " #c10707, ";
+                        firstHalfStylesheet += "stop: " + QString::number(redPortions[x+2]) + " #c10707, ";
+                        firstHalfStylesheet += "stop: " + QString::number(redPortions[x+3]) + " #25c660, ";
+                    }
+                    QString stylesheet = firstHalfStylesheet + secondHalfStylesheet;
+                    ui->slider->setStyleSheet(stylesheet);
 
                     /*
                     while (!in.atEnd())
@@ -666,6 +712,8 @@ void mainFrame::on_reportButton_clicked()
                         }
                     }
                     */
+                    ui->horizontalSlider->setEnabled(true);
+                    ui->horizontalSlider->setValue(0);
                     QVector<double> xx = QVector<double>::fromStdVector(x);
                     QVector<double> yy = QVector<double>::fromStdVector(y);
 
@@ -683,7 +731,7 @@ void mainFrame::on_reportButton_clicked()
                     ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
                     //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
                     ui->customPlot->graph(0)->setData(xx, yy);
-                    ui->customPlot->xAxis->scaleRange(5.0, ui->customPlot->xAxis->range().center());
+                    ui->customPlot->xAxis->scaleRange(8.0, ui->customPlot->xAxis->range().center());
                     //ADDED
                     ui->customPlot->addGraph();
                     QPen solid;
@@ -694,10 +742,32 @@ void mainFrame::on_reportButton_clicked()
                     ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
                     //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
                     ui->customPlot->graph(1)->setData(xxDiag, yyDiag);
-                    ui->customPlot->xAxis->scaleRange(5.0, ui->customPlot->xAxis->range().center());
+                    section->bottomRight->setCoords(frameNum, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
 
                     ui->customPlot->replot();
+                    connect(ui->horizontalSlider, &QSlider::valueChanged, this, [&](int moved)
+                    {
+                        //FIX THIS
+                        double alpha = 1.0;
+                        int delta = moved - lastValue;
+                        if (delta > 0)
+                        {
+                            for (int x = lastValue + 1; x < moved + 1; x++)
+                            {
+                                alpha *= 1/(1.1);
+                            }
+                        }
+                        else {
+                            for (int x = lastValue - 1; x > moved - 1; x--)
+                            {
+                                alpha *= 1.1;
+                            }
+                        }
 
+                        ui->customPlot->xAxis->scaleRange(alpha, ui->customPlot->xAxis->range().center());
+                        ui->customPlot->replot();
+                        lastValue = moved;
+                    });
                     // Load warnings
                     ui->backWarning->setStyleSheet("#backWarning { background-image: url(:/images/Res/PrevWarningUp.png); border-image: url(:/images/Res/PrevWarningUp.png); } #backWarning:hover { border-image: url(:/images/Res/PrevWarningDownHilite.png); } #backWarning:pressed { border-image: url(:/images/Res/PrevWarningPressed.png); }");
                     ui->forwardWarning->setStyleSheet("#forwardWarning { background-image: url(:/images/Res/NextvWarningUp.png); border-image: url(:/images/Res/NextWarningUp.png); } #forwardWarning:hover { border-image: url(:/images/Res/NextWarningDownHilite.png); } #forwardWarning:pressed { border-image: url(:/images/Res/NextWarningPressed.png); }");
@@ -731,7 +801,7 @@ void mainFrame::on_reportButton_clicked()
 
 void mainFrame::openReport()
 {
-    QString filename = QFileDialog::getOpenFileName(this, "Open a report file", "", ".txt (*.txt)");
+    QString filename = QFileDialog::getOpenFileName(this, "Open a report file", "", "Open PEAT Report [NON-USER] (*.txt)");
     ui->label->setText(filename);
     if(!filename.isEmpty())
     {
@@ -935,6 +1005,7 @@ void mainFrame::openReport()
             //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
             ui->customPlot->graph(0)->setData(xx, yy);
             ui->customPlot->xAxis->scaleRange(8.0, ui->customPlot->xAxis->range().center());
+            section->bottomRight->setCoords(frameNum, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
 
             //ADDED
             ui->customPlot->addGraph();
@@ -946,29 +1017,29 @@ void mainFrame::openReport()
             ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
             //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
             ui->customPlot->graph(1)->setData(xxDiag, yyDiag);
+            ui->customPlot->yAxis->setVisible(false);
 
             ui->customPlot->replot();
+            ui->horizontalSlider->setEnabled(true);
+            ui->horizontalSlider->setValue(0);
             connect(ui->horizontalSlider, &QSlider::valueChanged, this, [&](int moved)
             {
                 //FIX THIS
-                int alpha;
+                double alpha = 1.0;
                 int delta = moved - lastValue;
                 if (delta > 0)
                 {
                     for (int x = lastValue + 1; x < moved + 1; x++)
                     {
-                        alpha *= 1.0 + (x)*0.01;
+                        alpha *= 1/(1.1);
                     }
                 }
                 else {
                     for (int x = lastValue - 1; x > moved - 1; x--)
                     {
-                        alpha *= 1/(1.0 + (abs(x))*0.01);
+                        alpha *= 1.1;
                     }
                 }
-                qDebug() << "Delta: " << moved - lastValue;
-                qDebug() << "Moved: " << moved;
-                qDebug() << "Last: " << lastValue;
 
                 ui->customPlot->xAxis->scaleRange(alpha, ui->customPlot->xAxis->range().center());
                 ui->customPlot->replot();
