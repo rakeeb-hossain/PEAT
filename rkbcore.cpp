@@ -428,6 +428,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
         {
             for(int k = 0; k < frame1.cols - 341; k += 30)
             {
+                diagInt = 0;
                 int currentLumSizeSecond = lumDiagFrames.size();
                 wasSeizure = false;
                 avgLum = 0.0;
@@ -562,7 +563,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                         qDebug() << currentLumSizeSecond;
                         qDebug() << lumDiagFrames[lumDiagFrames.size() - 1][1];
                         //currentLumSizeSecond = 297 for some reason
-                        //lumDiagFrames.erase(lumDiagFrames.begin() + currentLumSizeSecond - 1, lumDiagFrames.begin() + lumDiagFrames.size() - 1 - lumDiagFrames[lumDiagFrames.size() - 1][1]);
+                        lumDiagFrames.erase(lumDiagFrames.begin() + currentLumSizeSecond - 1, lumDiagFrames.begin() + lumDiagFrames.size() - 1 - lumDiagFrames[lumDiagFrames.size() - 1][1]);
                     }
                     else {
                         seizureBoundaries[seizureBoundaries.size() - 1][1] = lumDiagFrames[lumDiagFrames.size() - 1][0];
@@ -607,7 +608,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                 for (int i = 0; i < newDiagFrames.size(); i++)
                 {
                     qDebug() << "Test4: " << newDiagFrames[i];
-                    /*
+
                     if (i != 0)
                     {
                         lumDiagFrames.push_back({newDiagFrames[i], 2});
@@ -615,8 +616,6 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                     else {
                         lumDiagFrames.push_back({newDiagFrames[i], i + 1});
                     }
-                    */
-                    lumDiagFrames.push_back({newDiagFrames[i], i+1});
                 }
                 for (int x = 0; x < newDiagFrames.size(); x++)
                 {
@@ -633,13 +632,14 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
             }
         }
     }
-    /*
+
     vector< vector<int>> newLumInfo = {};
-    int editCount = 0;
-    bool foundRepeat = false;
+
     //Loop to edit lumDiagFrames
     for (int i = 0; i < lumDiagFrames.size(); i++)
     {
+        bool foundRepeat = false;
+
         for (int x = 0; x < newLumInfo.size(); x++)
         {
             if (lumDiagFrames[i][0] == newLumInfo[x][0])
@@ -653,7 +653,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
             newLumInfo.push_back(lumDiagFrames[i]);
         }
     }
-    */
+
     //
     if (seizureBoundaries.size() > 1) {
         if ( file.open(QIODevice::ReadWrite|QIODevice::Text) )
@@ -709,10 +709,10 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
     if(in.atEnd())
     {
         stream << "Diagnostic" << endl;
-        for (int x = 0; x < lumDiagFrames.size(); x++)
+        for (int x = 0; x < newLumInfo.size(); x++)
         {
-            stream << lumDiagFrames[x][0] << endl;
-            stream << lumDiagFrames[x][1] << endl;
+            stream << newLumInfo[x][0] << endl;
+            stream << newLumInfo[x][1] << endl;
         }
     }
 
