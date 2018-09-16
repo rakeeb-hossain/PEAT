@@ -263,10 +263,12 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
     int aarb = 0;
     int rate = round(properties[1]);
 
+    /*
     QString newPath = QString::fromStdString(path);
     QDir dir(newPath);
     dir.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
     numOfFrames = dir.count();
+    */
 
     vector<vector<int > > seizureBoundaries;
     seizureBoundaries.push_back({0,0});
@@ -607,7 +609,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                 for (int i = 0; i < newDiagFrames.size(); i++)
                 {
                     qDebug() << "Test4: " << newDiagFrames[i];
-                    /*
+
                     if (i != 0)
                     {
                         lumDiagFrames.push_back({newDiagFrames[i], 2});
@@ -615,8 +617,6 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                     else {
                         lumDiagFrames.push_back({newDiagFrames[i], i + 1});
                     }
-                    */
-                    lumDiagFrames.push_back({newDiagFrames[i], i+1});
                 }
                 for (int x = 0; x < newDiagFrames.size(); x++)
                 {
@@ -633,7 +633,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
             }
         }
     }
-    /*
+
     vector< vector<int>> newLumInfo = {};
     int editCount = 0;
     bool foundRepeat = false;
@@ -644,6 +644,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
         {
             if (lumDiagFrames[i][0] == newLumInfo[x][0])
             {
+                qDebug() << "Match: " << lumDiagFrames[i][0];
                 foundRepeat = true;
                 break;
             }
@@ -653,7 +654,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
             newLumInfo.push_back(lumDiagFrames[i]);
         }
     }
-    */
+
     //
     if (seizureBoundaries.size() > 1) {
         if ( file.open(QIODevice::ReadWrite|QIODevice::Text) )
