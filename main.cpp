@@ -1,19 +1,15 @@
 #include "mainwindow.h"
 #include <QApplication>
 
-/*
-extern "C"
-    {
-        #include <libavformat/avformat.h>
-        #include <libavcodec/avcodec.h>
-        #include <libavutil/avutil.h>
-    }
-*/
+
+
+
 int main(int argc, char *argv[])
 {
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
     QApplication a(argc, argv);
 
-    //av_register_all();
 
     a.setWindowIcon(QIcon(":/Res/PEAT.ico"));
 
@@ -22,6 +18,9 @@ int main(int argc, char *argv[])
     MainWindow w;
 
     w.show();
+
+//    AllocConsole();
+//    ShowWindow(GetConsoleWindow(), SW_HIDE);
 
     return a.exec();
 }

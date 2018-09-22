@@ -14,6 +14,15 @@ class waitDialog : public QDialog
 public:
     explicit waitDialog(QWidget *parent = 0);
     ~waitDialog();
+    /*
+    bool first = true;
+    bool second = false;
+    bool third = false;
+    QTimer *timer;
+    */
+
+private slots:
+    //void changeText();
 
 private:
     Ui::waitDialog *ui;

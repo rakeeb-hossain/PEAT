@@ -689,6 +689,9 @@ border-image: url(:/images/Res/RewindDisabled.png);</string>
      <height>20</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Video Extension&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
    <property name="styleSheet">
     <string notr="true">background-color:rgb(220, 220, 220);
 </string>
@@ -714,6 +717,9 @@ border-image: url(:/images/Res/RewindDisabled.png);</string>
      <width>91</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Framerate&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="styleSheet">
     <string notr="true">background-color:rgb(220, 220, 220);
@@ -744,6 +750,9 @@ border-image: url(:/images/Res/RewindDisabled.png);</string>
    <property name="mouseTracking">
     <bool>false</bool>
    </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Duration (hh:mm:ss:ms)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
    <property name="autoFillBackground">
     <bool>false</bool>
    </property>
@@ -773,6 +782,12 @@ border-image: url(:/images/Res/RewindDisabled.png);</string>
      <height>20</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;File Dimensions (length x width)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="whatsThis">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
    <property name="styleSheet">
     <string notr="true">background-color:rgb(200, 200, 210);
 </string>
@@ -799,6 +814,9 @@ border-image: url(:/images/Res/RewindDisabled.png);</string>
      <height>20</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Compression type&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
    <property name="styleSheet">
     <string notr="true">background-color:rgb(200, 200, 210);
 </string>
@@ -824,6 +842,9 @@ border-image: url(:/images/Res/RewindDisabled.png);</string>
      <width>111</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Decompression Type&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="styleSheet">
     <string notr="true">background-color:rgb(200, 200, 210);
@@ -884,6 +905,51 @@ QSlider::handle:horizontal {
     <enum>Qt::Horizontal</enum>
    </property>
   </widget>
+  <widget class="QSlider" name="slider_2">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>450</y>
+     <width>771</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QSlider::groove:horizontal {
+    border: 1px solid #999999;
+    height: 10px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+   background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #00B1B1B1, stop: 1.0 #00c4c4c4);
+    margin: 2px 0;
+}
+
+QSlider::handle:horizontal {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #00b4b4b4, stop:1 #008f8f8f);
+    border: 1px solid #5c5c5c;
+    width:0px;
+    margin: 0px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
+    border-radius: 3px;
+}
+</string>
+   </property>
+   <property name="maximum">
+    <number>99</number>
+   </property>
+   <property name="singleStep">
+    <number>1</number>
+   </property>
+   <property name="pageStep">
+    <number>1</number>
+   </property>
+   <property name="sliderPosition">
+    <number>0</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="tickPosition">
+    <enum>QSlider::NoTicks</enum>
+   </property>
+  </widget>
   <action name="actionOpenFile">
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -896,6 +962,37 @@ QSlider::handle:horizontal {
     <string>Open a File</string>
    </property>
   </action>
+  <zorder>slider_2</zorder>
+  <zorder>folderButton</zorder>
+  <zorder>line</zorder>
+  <zorder>line_2</zorder>
+  <zorder>rewindButton</zorder>
+  <zorder>playButton</zorder>
+  <zorder>pauseButton</zorder>
+  <zorder>forwardButton</zorder>
+  <zorder>slider</zorder>
+  <zorder>label</zorder>
+  <zorder>timeLabel</zorder>
+  <zorder>reportButton</zorder>
+  <zorder>label_2</zorder>
+  <zorder>frame</zorder>
+  <zorder>customPlot</zorder>
+  <zorder>horizontalScrollBar</zorder>
+  <zorder>label_3</zorder>
+  <zorder>widget</zorder>
+  <zorder>label_5</zorder>
+  <zorder>backWarning</zorder>
+  <zorder>forwardWarning</zorder>
+  <zorder>label_6</zorder>
+  <zorder>label_7</zorder>
+  <zorder>restartButton</zorder>
+  <zorder>label_8</zorder>
+  <zorder>label_9</zorder>
+  <zorder>label_10</zorder>
+  <zorder>label_11</zorder>
+  <zorder>label_12</zorder>
+  <zorder>label_13</zorder>
+  <zorder>horizontalSlider</zorder>
  </widget>
  <customwidgets>
   <customwidget>

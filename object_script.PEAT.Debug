@@ -1,0 +1,15 @@
+INPUT(
+./debug\main.o
+./debug\mainframe.o
+./debug\mainwindow.o
+./debug\rkbcore.o
+./debug\waitdialog.o
+./debug\qcustomplot.o
+./debug\rkbprotool.o
+./debug\qrc_resources.o
+./debug\moc_mainframe.o
+./debug\moc_mainwindow.o
+./debug\moc_waitdialog.o
+./debug\moc_qcustomplot.o
+./debug\moc_rkbprotool.o
+);

@@ -8,6 +8,7 @@ QT       += core gui multimedia multimediawidgets printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+CONFIG += static
 TARGET = PEAT
 TEMPLATE = app
 

@@ -47,6 +47,7 @@ public:
     QAction *skipFrameRight;
     bool forwardWarningJustPressed = false;
     int lastValue = 0;
+    bool firstOpen = true;
 
 public slots:
 
@@ -97,6 +98,7 @@ private slots:
 
     string execute(const char * cmd);
 
+    string replaceChar(string str, char ch1, char ch2);
 
 private:
     Ui::mainFrame *ui;
@@ -108,12 +110,12 @@ private:
     QProgressBar* bar;
     QSlider* slider;
     QMediaPlaylist *playlist;
-    waitDialog *waitdialog;
     QMenuBar *menubar;
     QStatusBar *statusbar;
     int index = 0;
     rkbProTool *rkbprotool;
     QCPItemRect *section;
+    waitDialog *waitdialog;
 
 };
 
